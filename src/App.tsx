@@ -1,24 +1,105 @@
 import React from 'react';
-import logo from './logo.svg';
+import {
+  DatabaseOutlined,
+  TableOutlined,
+  ProfileOutlined,
+  FolderViewOutlined,
+} from '@ant-design/icons';
+import TreeSearch from './components/TreeSearch';
 import './App.css';
+
+const treeData = [
+  {
+    title: 'database1',
+    icon: <DatabaseOutlined />,
+    children: [
+      {
+        title: 'Table',
+        icon: <TableOutlined />,
+        extra: <a>测试</a>,
+        children: [
+          {
+            title: 'table1',
+            icon: <ProfileOutlined />,
+          },
+          {
+            title: 'table2',
+            icon: <ProfileOutlined />,
+            extra: <a>测试</a>,
+          },
+        ],
+      },
+      {
+        title: 'View',
+        icon: <FolderViewOutlined />,
+        children: [
+          {
+            title: 'view1',
+            icon: <ProfileOutlined />,
+          },
+          {
+            title: 'view2',
+            icon: <ProfileOutlined />,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    title: 'database2',
+    icon: <DatabaseOutlined />,
+    children: [
+      {
+        title: 'Table',
+        icon: <TableOutlined />,
+        extra: (
+          <a
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('test');
+            }}
+          >
+            测试
+          </a>
+        ),
+        children: [
+          {
+            title: 'table1',
+            icon: <ProfileOutlined />,
+          },
+          {
+            title: 'table2',
+            icon: <ProfileOutlined />,
+          },
+        ],
+      },
+      {
+        title: 'View',
+        icon: <FolderViewOutlined />,
+        children: [
+          {
+            title: 'view1',
+            icon: <ProfileOutlined />,
+          },
+          {
+            title: 'view2',
+            icon: <ProfileOutlined />,
+          },
+        ],
+      },
+    ],
+  },
+];
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div
+      style={{
+        margin: 50,
+        textAlign: 'center',
+      }}
+    >
+      <TreeSearch treeData={treeData} />
     </div>
   );
 }
