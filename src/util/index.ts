@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { TreeNode } from '../components/TreeSearch/typings';
 
 /**
- * 筛选树节点
+ * antd版本的筛选树节点
  * @param searchValue 搜索关键字
  * @param treeData 数据
  */
@@ -124,3 +124,34 @@ export const getParentKey: (key: string, treeData: InnerTreeNodeType[]) => strin
   }
   return parentKey;
 };
+
+/**
+ * 更精确的搜索
+ * @param searchValue 搜索关键字
+ * @param treeData 树节点
+ */
+export function filter(searchValue, treeData) {
+  return treeData.reduce((result, node) => {
+    const selfContain = node.title.includes(searchValue.trim());
+    if (selfContain) {
+      if (Array.isArray(node.children)) {
+        result.push({
+          ...node,
+          children: filter(searchValue, node.children),
+        });
+      } else {
+        result.push(node);
+      }
+    } else if (Array.isArray(node.children)) {
+      const childList = filter(searchValue, node.children);
+      if (childList.length) {
+        result.push({
+          ...node,
+          children: childList,
+        });
+      }
+    }
+
+    return result;
+  }, []);
+}

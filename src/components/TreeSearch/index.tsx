@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Space, Tree, Input, Empty, Spin } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
 import { debounce, flatMapDeep } from 'lodash';
-import { generateKey, filterTreeData, getAllNodeKeys } from '../../util';
+import { generateKey, filterTreeData, getAllNodeKeys, filter } from '../../util';
 import styles from './style.less';
 import { TreeNode } from './typings';
 
@@ -80,7 +80,9 @@ const TreeSearch: React.FC<Props> = ({ treeData }) => {
     setSearchValue(e.target.value);
     if (e.target.value) {
       setSearching(true);
-      const newTreeData = filterTreeData(e.target.value, treeDataRef.current);
+      // 基于antd参考实现的tree search
+      // const newTreeData = filterTreeData(e.target.value, treeDataRef.current);
+      const newTreeData = filter(e.target.value, treeDataRef.current);
       const expandAllKeys = getAllNodeKeys(newTreeData);
       setInnerTreeData(newTreeData);
       setExpandedKeys(expandAllKeys);
