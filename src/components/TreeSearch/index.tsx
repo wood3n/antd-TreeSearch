@@ -1,78 +1,31 @@
 // @ts-nocheck
-import React, { useState, useEffect, useMemo } from 'react';
-import { Space, Tree, Input } from 'antd';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Space, Tree, Input, Empty, Spin } from 'antd';
 import { DataNode } from 'rc-tree/lib/interface';
 import { debounce, flatMapDeep } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
+import { generateKey, filterTreeData, getAllNodeKeys } from '../../util';
 import styles from './style.less';
+import { TreeNode } from './typings';
 
-interface TreeNode {
-  title: string;
-  icon?: React.ReactNode;
-  extra?: React.ReactNode;
-  children?: TreeNode[];
+interface InnerTreeDataType extends TreeNode {
+  key: string;
 }
 
 interface Props {
   treeData: TreeNode[];
 }
 
-const generateKey: (treeData: TreeNode[]) => DataNode[] = (treeData: TreeNode[]) => {
-  return treeData.map((node) => {
-    const { children, ...rest } = node;
-    if (children) {
-      return {
-        key: uuidv4(),
-        children: generateKey(children),
-        ...rest,
-      };
-    }
-
-    return {
-      key: uuidv4(),
-      ...rest,
-    };
-  });
-};
-
-const notEmptyArray = (value: any) => {
-  return Array.isArray(value) && value.length > 0;
-};
-
-// 拍平节点
-const generateList = (treeData) => {
-  return flatMapDeep(treeData, (node) => {
-    return [
-      {
-        title: node.title,
-        key: node.key,
-      },
-      [...generateList(node.children)],
-    ];
-  });
-};
-
-// const generateList = (treeData: TreeNode[], dataList = []) => {
-//   treeData.forEach((node) => {
-//     dataList.push({
-//       title: node.title,
-//       key: node.key,
-//     });
-
-//     if (node.children) {
-//       generateList(node.children, dataList);
-//     }
-//   });
-//   return dataList;
-// };
-
 const TreeSearch: React.FC<Props> = ({ treeData }) => {
+  const [innerTreeData, setInnerTreeData] = useState<InnerTreeDataType[]>([]);
   const [searchValue, setSearchValue] = useState<string>();
+  const [searching, setSearching] = useState(false);
+  const treeDataRef = useRef<InnerTreeDataType>();
   const [expandedKeys, setExpandedKeys] = useState<React.ReactText[]>();
   const [autoExpandParent, setAutoExpandParent] = useState(false);
 
   const onExpand = (keys: React.ReactText[]) => {
     setExpandedKeys(keys);
+    setAutoExpandParent(false);
   };
 
   const titleRender = (nodeData: TreeNode) => {
@@ -115,32 +68,49 @@ const TreeSearch: React.FC<Props> = ({ treeData }) => {
     return nodeData.title;
   };
 
-  const innerTreeData = useMemo(() => {
-    return generateKey(treeData);
+  // 填充key
+  useEffect(() => {
+    const newTreeData = generateKey(treeData);
+    treeDataRef.current = newTreeData;
+    setInnerTreeData(newTreeData);
   }, [treeData]);
-
-  console.log(generateList(innerTreeData));
 
   // 搜索
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value.trim().toLocaleLowerCase());
-    setAutoExpandParent(true);
+    setSearchValue(e.target.value);
+    if (e.target.value) {
+      setSearching(true);
+      const newTreeData = filterTreeData(e.target.value, treeDataRef.current);
+      const expandAllKeys = getAllNodeKeys(newTreeData);
+      setInnerTreeData(newTreeData);
+      setExpandedKeys(expandAllKeys);
+      setAutoExpandParent(true);
+      setSearching(false);
+    } else {
+      setInnerTreeData(treeDataRef.current);
+      setAutoExpandParent(false);
+    }
   };
 
   return (
     <Space direction='vertical'>
-      <Input.Search onChange={debounce(onChange, 500)} />
-      <Tree
-        className={styles.customTree}
-        blockNode
-        showIcon
-        defaultExpandAll
-        onExpand={onExpand}
-        expandedKeys={expandedKeys}
-        autoExpandParent={autoExpandParent}
-        titleRender={titleRender}
-        treeData={innerTreeData}
-      />
+      <Input.Search onChange={debounce(onChange, 500)} allowClear />
+      <Spin spinning={searching}>
+        {innerTreeData.length > 0 ? (
+          <Tree
+            className={styles.customTree}
+            blockNode
+            showIcon
+            onExpand={onExpand}
+            expandedKeys={expandedKeys}
+            autoExpandParent={autoExpandParent}
+            titleRender={titleRender}
+            treeData={innerTreeData}
+          />
+        ) : (
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description='暂无数据' />
+        )}
+      </Spin>
     </Space>
   );
 };

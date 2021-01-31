@@ -8,6 +8,11 @@ import {
 import TreeSearch from './components/TreeSearch';
 import './App.css';
 
+const alertMsg = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+  event.stopPropagation();
+  alert('test');
+};
+
 const treeData = [
   {
     title: 'database1',
@@ -16,7 +21,7 @@ const treeData = [
       {
         title: 'Table',
         icon: <TableOutlined />,
-        extra: <a>测试</a>,
+        extra: <a onClick={alertMsg}>测试</a>,
         children: [
           {
             title: 'table1',
@@ -25,7 +30,7 @@ const treeData = [
           {
             title: 'table2',
             icon: <ProfileOutlined />,
-            extra: <a>测试</a>,
+            extra: <a onClick={alertMsg}>测试</a>,
           },
         ],
       },
@@ -52,16 +57,7 @@ const treeData = [
       {
         title: 'Table',
         icon: <TableOutlined />,
-        extra: (
-          <a
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log('test');
-            }}
-          >
-            测试
-          </a>
-        ),
+        extra: <a onClick={alertMsg}>测试</a>,
         children: [
           {
             title: 'table1',
