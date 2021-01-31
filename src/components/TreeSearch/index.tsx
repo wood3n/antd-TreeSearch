@@ -13,9 +13,10 @@ interface InnerTreeDataType extends TreeNode {
 
 interface Props {
   treeData: TreeNode[];
+  justSeachLeaf?: boolean;
 }
 
-const TreeSearch: React.FC<Props> = ({ treeData }) => {
+const TreeSearch: React.FC<Props> = ({ treeData, justSeachLeaf }) => {
   const [innerTreeData, setInnerTreeData] = useState<InnerTreeDataType[]>([]);
   const [searchValue, setSearchValue] = useState<string>();
   const [searching, setSearching] = useState(false);
